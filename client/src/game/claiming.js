@@ -28,9 +28,14 @@ export function canPung(hand, discardedTile, jokerTile) {
   return matches >= 2 || (matches >= 1 && wilds >= 1) || wilds >= 2
 }
 
-/** Can player Chow (claim run) this discarded tile? Need 2 tiles to complete sequence. */
-export function canChow(hand, discardedTile, jokerTile) {
+/** Can player Chow (claim run) this discarded tile? Need 2 tiles to complete sequence.
+ * In 4-player, Chow can only be claimed from the player to your left (who discarded before you). */
+export function canChow(hand, discardedTile, jokerTile, { fromPlayerIndex, claimingPlayerIndex, numPlayers } = {}) {
   if (!isNumberSuit(discardedTile.suit)) return false
+  if (numPlayers === 4 && fromPlayerIndex != null && claimingPlayerIndex != null) {
+    const leftOfClaimer = (claimingPlayerIndex + numPlayers - 1) % numPlayers
+    if (fromPlayerIndex !== leftOfClaimer) return false
+  }
   const val = discardedTile.value
   if (typeof val !== 'number') return false
 

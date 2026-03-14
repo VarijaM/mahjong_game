@@ -18,17 +18,18 @@ export function aiTakeTurn(game) {
   return toDiscard?.id
 }
 
-/** Try to claim before drawing - returns true if claimed */
+/** Try to claim before drawing - returns true if claimed. Handles any AI player index. */
 export function aiTryClaim(game) {
   if (!game.lastDiscard) return false
-  const aiIndex = 1
+  const aiIndex = game.currentPlayerIndex
   const { tile, fromPlayerIndex } = game.lastDiscard
   const aiHand = game.players[aiIndex].hand
+  const numPlayers = game.numPlayers || 4
 
   if (canPung(aiHand, tile, game.jokerTile)) {
     return claimPung(game, aiIndex, fromPlayerIndex).ok
   }
-  if (canChow(aiHand, tile, game.jokerTile)) {
+  if (canChow(aiHand, tile, game.jokerTile, { fromPlayerIndex, claimingPlayerIndex: aiIndex, numPlayers })) {
     return claimChow(game, aiIndex, fromPlayerIndex).ok
   }
   return false

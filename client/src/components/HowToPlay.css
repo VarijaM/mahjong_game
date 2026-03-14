@@ -75,3 +75,18 @@
   padding-left: 1.25rem;
   line-height: 1.7;
 }
+
+.htp-overview .htp-sources {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  margin-top: 0.5rem;
+}
+
+.htp-overview .htp-sources a {
+  color: #c9a227;
+  text-decoration: none;
+}
+
+.htp-overview .htp-sources a:hover {
+  text-decoration: underline;
+}

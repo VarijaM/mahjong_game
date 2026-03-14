@@ -5,12 +5,12 @@ import { getDiscardHint, canWin } from '../game/winDetection'
 import { canPung, canChow } from '../game/claiming'
 import { aiTakeTurn, aiTryClaim } from '../game/ai'
 import { getTileLabel } from '../game/tiles'
-import { calculateScore } from '../game/scoring'
+import { calculateScore, calculatePayout } from '../game/scoring'
 import './GameBoard.css'
 
 export function GameBoard({ mode = 'computer', onBack, multiplayerData }) {
   const isMultiplayer = mode === 'multiplayer' && multiplayerData?.game && multiplayerData?.socket
-  const [game, setGame] = useState(() => (multiplayerData?.game && multiplayerData?.socket ? multiplayerData.game : createGame(2)))
+  const [game, setGame] = useState(() => (multiplayerData?.game && multiplayerData?.socket ? multiplayerData.game : createGame(4)))
   const [selectedTileId, setSelectedTileId] = useState(null)
   const [hintTileId, setHintTileId] = useState(null)
   const [isDealerStart, setIsDealerStart] = useState(true)
@@ -32,7 +32,7 @@ export function GameBoard({ mode = 'computer', onBack, multiplayerData }) {
       else if (isMyTurn && g.players[myIdx].hand.length + (g.players[myIdx].melds?.flatMap(m => m.tiles).length || 0) === 14)
         setMessage('Click a tile below, then click "Discard Selected"')
       else if (isMyTurn) setMessage('Draw a tile or claim the last discard.')
-      else setMessage('Waiting for opponent...')
+      else setMessage('Waiting for opponents...')
     }
     multiplayerData.socket.on('game-update', onUpdate)
     return () => multiplayerData.socket.off('game-update', onUpdate)
@@ -43,8 +43,7 @@ export function GameBoard({ mode = 'computer', onBack, multiplayerData }) {
     : 0
   const isHumanTurn = game.currentPlayerIndex === humanIndex
   const humanPlayer = game.players[humanIndex]
-  const opponentIndex = humanIndex === 0 ? 1 : 0
-  const opponentPlayer = game.players[opponentIndex]
+  const opponentIndices = [0, 1, 2, 3].filter(i => i !== humanIndex)
 
   const sortHand = (hand) => {
     const order = { flower: 0, dots: 1, bamboo: 2, characters: 3, wind: 4, dragon: 5 }
@@ -113,7 +112,7 @@ export function GameBoard({ mode = 'computer', onBack, multiplayerData }) {
       setSelectedTileId(null)
       setHintTileId(null)
       setIsDealerStart(false)
-      setMessage('Waiting for opponent...')
+      setMessage('Waiting for opponents...')
       return
     }
     const gameCopy = cloneGame(g)
@@ -131,40 +130,47 @@ export function GameBoard({ mode = 'computer', onBack, multiplayerData }) {
   }, [isMultiplayer, humanIndex, multiplayerData?.socket])
 
   const runAITurn = useCallback((gameState) => {
-    const g = gameState ?? gameRef.current
-    const gameCopy = cloneGame(g)
-    if (gameCopy.phase === 'won') return
+    const runOneAITurn = (g) => {
+      const gameCopy = cloneGame(g)
+      if (gameCopy.phase === 'won') return gameCopy
 
-    const ai = gameCopy.players[1]
-    const aiTotalTiles = ai.hand.length + (ai.melds?.flatMap(m => m.tiles).length || 0)
+      const aiIdx = gameCopy.currentPlayerIndex
+      const ai = gameCopy.players[aiIdx]
+      const aiTotalTiles = ai.hand.length + (ai.melds?.flatMap(m => m.tiles).length || 0)
 
-    const claimed = aiTryClaim(gameCopy)
-    if (claimed) {
-      setGame(cloneGame(gameCopy))
-      if (gameCopy.phase === 'won') return
-      setMessage('AI claimed! AI discards...')
+      const claimed = aiTryClaim(gameCopy)
+      if (claimed) {
+        if (gameCopy.phase === 'won') return gameCopy
+        const toDiscardId = aiTakeTurn(gameCopy)
+        if (toDiscardId) discard(gameCopy, toDiscardId)
+        return gameCopy
+      }
+
+      if (aiTotalTiles === 13) {
+        const drawResult = draw(gameCopy)
+        if (drawResult.ok && gameCopy.phase === 'won') return gameCopy
+      }
+
       const toDiscardId = aiTakeTurn(gameCopy)
       if (toDiscardId) discard(gameCopy, toDiscardId)
-      setGame(cloneGame(gameCopy))
-      setMessage('Your turn: draw a tile.')
-      return
+      return gameCopy
     }
 
-    if (aiTotalTiles === 13) {
-      const drawResult = draw(gameCopy)
-      if (drawResult.ok) {
-        if (gameCopy.phase === 'won') {
-          setGame(cloneGame(gameCopy))
-          return
-        }
+    const runUntilHumanTurn = () => {
+      let g = gameState ?? gameRef.current
+      g = runOneAITurn(g)
+      setGame(cloneGame(g))
+      if (g.phase === 'won') return
+      if (g.currentPlayerIndex === humanIndex) {
+        setMessage('Your turn: draw a tile.')
+        return
       }
+      setMessage('AI thinking...')
+      setTimeout(runUntilHumanTurn, 600)
     }
 
-    const toDiscardId = aiTakeTurn(gameCopy)
-    if (toDiscardId) discard(gameCopy, toDiscardId)
-    setGame(cloneGame(gameCopy))
-    setMessage('Your turn: draw a tile.')
-  }, [])
+    runUntilHumanTurn()
+  }, [humanIndex])
 
   const handleClaimPung = useCallback(() => {
     if (!game.lastDiscard) return
@@ -210,26 +216,45 @@ export function GameBoard({ mode = 'computer', onBack, multiplayerData }) {
   }, [humanPlayer.hand, game.jokerTile])
 
   const handleNextRound = useCallback(() => {
+    const oppIndices = [0, 1, 2, 3].filter(i => i !== humanIndex)
     const winner = game.winner
-    if (winner === 0) {
-      const allTiles = [...(humanPlayer.hand || []), ...(humanPlayer.melds?.flatMap(m => m.tiles) || [])]
-      const score = calculateScore(allTiles, game.jokerTile, { selfDraw: !!game.lastDrawn, flowers: humanPlayer.flowers || [] })
-      setScores(prev => ({ ...prev, human: prev.human + score }))
-    } else if (winner === 1) {
-      setScores(prev => ({ ...prev, ai: prev.ai + 50 }))
+    const winnerPlayer = game.players[winner]
+    const loserIndex = winner === humanIndex ? (game.lastDiscard?.fromPlayerIndex ?? oppIndices[0]) : humanIndex
+    const selfDraw = !game.lastDiscard
+    const concealed = (winnerPlayer.melds || []).length === 0
+
+    const scoreResult = calculateScore({
+      melds: winnerPlayer.melds || [],
+      hand: winnerPlayer.hand || [],
+      flowers: winnerPlayer.flowers || [],
+      jokerTile: game.jokerTile,
+      selfDraw,
+      concealed,
+      drewFromBack: false
+    })
+    const payout = calculatePayout(scoreResult.roundedScore, {
+      loserDiscarded: game.lastDiscard?.fromPlayerIndex === loserIndex,
+      selfDraw,
+      loserIsBanker: loserIndex === game.dealerIndex
+    })
+
+    if (winner === humanIndex) {
+      setScores(prev => ({ ...prev, human: prev.human + payout }))
+    } else {
+      setScores(prev => ({ ...prev, ai: prev.ai + payout }))
     }
     setRoundNumber(prev => prev + 1)
-    setGame(createGame(2))
+    setGame(createGame(4))
     setSelectedTileId(null)
     setHintTileId(null)
     setIsDealerStart(true)
     setMessage('Dealer draws first tile.')
-  }, [game])
+  }, [game, humanIndex])
 
   const handleResetGame = useCallback(() => {
     setScores({ human: 0, ai: 0 })
     setRoundNumber(1)
-    setGame(createGame(2))
+    setGame(createGame(4))
     setSelectedTileId(null)
     setHintTileId(null)
     setIsDealerStart(true)
@@ -237,7 +262,11 @@ export function GameBoard({ mode = 'computer', onBack, multiplayerData }) {
   }, [])
 
   const humanCanPung = game.lastDiscard && canPung(humanPlayer.hand, game.lastDiscard.tile, game.jokerTile)
-  const humanCanChow = game.lastDiscard && canChow(humanPlayer.hand, game.lastDiscard.tile, game.jokerTile)
+  const humanCanChow = game.lastDiscard && canChow(humanPlayer.hand, game.lastDiscard.tile, game.jokerTile, {
+    fromPlayerIndex: game.lastDiscard.fromPlayerIndex,
+    claimingPlayerIndex: humanIndex,
+    numPlayers: game.numPlayers || 4
+  })
   const meldTiles = humanPlayer.melds?.flatMap(m => m.tiles).length || 0
   const totalTiles = humanPlayer.hand.length + meldTiles
   const showDrawButton = !isDealerStart && isHumanTurn && !game.lastDrawn && totalTiles === 13 && game.wall.length > 0
@@ -245,25 +274,53 @@ export function GameBoard({ mode = 'computer', onBack, multiplayerData }) {
 
   if (game.phase === 'won') {
     const isHumanWinner = game.winner === humanIndex
-    const winningHand = isHumanWinner ? humanPlayer : opponentPlayer
+    const winnerPlayer = game.players[game.winner]
+    const winningHand = isHumanWinner ? humanPlayer : winnerPlayer
     const allWinningTiles = [
       ...(winningHand.melds || []).flatMap(m =>
         m.type === 'chow' ? [...m.tiles].sort((a, b) => (a.value ?? 0) - (b.value ?? 0)) : m.tiles
       ),
       ...sortHand(winningHand.hand)
     ]
+    const scoreResult = calculateScore({
+      melds: winningHand.melds || [],
+      hand: winningHand.hand || [],
+      flowers: winningHand.flowers || [],
+      jokerTile: game.jokerTile,
+      selfDraw: !game.lastDiscard,
+      concealed: (winningHand.melds || []).length === 0,
+      drewFromBack: false
+    })
+    const loserIdx = game.winner === humanIndex ? (game.lastDiscard?.fromPlayerIndex ?? 1) : humanIndex
+    const payout = calculatePayout(scoreResult.roundedScore, {
+      loserDiscarded: game.lastDiscard?.fromPlayerIndex === loserIdx,
+      selfDraw: !game.lastDiscard,
+      loserIsBanker: loserIdx === game.dealerIndex
+    })
     return (
       <div className="game-board">
         <div className="win-overlay">
-          <h2>{isHumanWinner ? '🎉 You Win!' : 'Opponent Wins!'}</h2>
+          <h2>{isHumanWinner ? '🎉 You Win!' : `${winnerPlayer?.username || 'Opponent'} Wins!`}</h2>
           <p>{isHumanWinner ? 'Mahjong!' : 'Better luck next round.'}</p>
           <div className="winning-hand-reveal">
-            <h4>{isHumanWinner ? 'Your winning hand:' : "Opponent's hand:"}</h4>
+            <h4>{isHumanWinner ? 'Your winning hand:' : `${winnerPlayer?.username || 'Winner'}'s hand:`}</h4>
             <div className="tile-row">
               {allWinningTiles.map(t => (
                 <Tile key={t.id} tile={t} />
               ))}
             </div>
+          </div>
+          <div className="score-breakdown">
+            <h4>Score</h4>
+            <p>Base + doubles → {scoreResult.roundedScore} pts (max 500)</p>
+            <p className="payout">Payout: {payout} pts</p>
+            {scoreResult.breakdown?.length > 0 && (
+              <ul>
+                {scoreResult.breakdown.map((line, i) => (
+                  <li key={i}>{line}</li>
+                ))}
+              </ul>
+            )}
           </div>
           <div className="win-actions">
             {!isMultiplayer && (
@@ -297,42 +354,56 @@ export function GameBoard({ mode = 'computer', onBack, multiplayerData }) {
 
       <div className="points-tracker">
         <h4>Points</h4>
-        <p>You: {scores.human} | {isMultiplayer ? 'Opponent' : 'AI'}: {scores.ai}</p>
+        <p>You: {scores.human} | Opponents: {scores.ai}</p>
         <p className="round">Round {roundNumber}</p>
         <details className="scoring-help">
           <summary>How points work</summary>
           <ul>
-            <li>Mahjong: 20 base</li>
-            <li>Pungs: +4 (terminals +8)</li>
-            <li>Flowers: +2 each</li>
-            <li>Self-draw: +2</li>
-            <li>Jokerless win: ×2</li>
+            <li>Win: +30, Sets: +4 (value +8)</li>
+            <li>Value pair: +2, Self-draw: +2</li>
+            <li>Doubles: value sets, all runs/sets, concealed, etc.</li>
+            <li>Round up to 10s; loser pays (2× if they discarded or self-draw)</li>
+            <li>Max 500 pts per hand</li>
           </ul>
         </details>
       </div>
 
       <p className="game-message">{message}</p>
 
-      <section className="opponent-section">
-        <h3>{isMultiplayer ? 'Opponent' : 'AI'} ({opponentPlayer.hand.length + (opponentPlayer.melds?.flatMap(m => m.tiles).length || 0)} tiles)</h3>
-        <div className="tile-row">
-          {opponentPlayer.hand.map((_, i) => (
-            <div key={`ai-${i}`} className="tile tile-back" />
-          ))}
-        </div>
+      <section className="opponents-section">
+        {opponentIndices.map(idx => {
+          const opp = game.players[idx]
+          const name = isMultiplayer ? (opp?.username || `Player ${idx + 1}`) : `AI ${idx}`
+          return (
+            <div key={idx} className="opponent-block">
+              <h4>{name} ({opp.hand.length + (opp.melds?.flatMap(m => m.tiles).length || 0)} tiles)</h4>
+              <div className="tile-row">
+                {opp.hand.map((_, i) => (
+                  <div key={`opp-${idx}-${i}`} className="tile tile-back" />
+                ))}
+              </div>
+            </div>
+          )
+        })}
       </section>
 
       <section className="discards-section">
         <h3>Discards</h3>
-        <div className="discards-human">
-          {humanPlayer.discards.map(t => (
-            <Tile key={t.id} tile={t} />
-          ))}
-        </div>
-        <div className="discards-ai">
-          {opponentPlayer.discards.map(t => (
-            <Tile key={t.id} tile={t} />
-          ))}
+        <div className="discards-grid">
+          {[humanIndex, ...opponentIndices].map(idx => {
+            const p = game.players[idx]
+            const label = idx === humanIndex ? 'You' : (isMultiplayer ? (p?.username || `P${idx + 1}`) : `AI ${idx}`)
+            return (
+              <div key={idx} className="discards-player">
+                <span className="discards-label">{label}</span>
+                <div className="discards-tiles">
+                  {p.discards.map(t => (
+                    <Tile key={t.id} tile={t} />
+                  ))}
+                </div>
+              </div>
+            )
+          })}
         </div>
         {game.lastDiscard && isHumanTurn && (
           <div className="last-discard-claims">

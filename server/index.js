@@ -9,10 +9,24 @@ import { Server } from 'socket.io'
 import { createGame, dealerDraw, draw, discard, claimPung, claimChow } from '../client/src/game/gameEngine.js'
 
 const app = express()
+const games = new Map() // code -> game state
+
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  next()
+})
+
+// Debug endpoint: verify server is reachable and list active game codes
+app.get('/api/games', (req, res) => {
+  res.json({ active: Array.from(games.keys()) })
+})
+
+app.get('/', (req, res) => {
+  res.send('Mahjong server running')
+})
+
 const http = createServer(app)
 const io = new Server(http, { cors: { origin: '*' } })
-
-const games = new Map() // code -> game state
 
 function generateCode() {
   let code = ''
@@ -21,25 +35,36 @@ function generateCode() {
 }
 
 io.on('connection', (socket) => {
-  socket.on('create-game', () => {
+  socket.on('create-game', (payload = {}) => {
+    const username = (payload && payload.username) || 'Host'
     let code = generateCode()
     while (games.has(code)) code = generateCode()
-    const game = createGame(2)
+    const game = createGame(4)
     game.code = code
     game.players[0].socketId = socket.id
+    game.players[0].username = username
     games.set(code, game)
     socket.join(`game-${code}`)
+    console.log(`[Mahjong] Game created: ${code} (${games.size} active)`)
     socket.emit('game-created', { code, game })
   })
 
-  socket.on('join-game', (code) => {
-    const game = games.get(code)
-    if (!game) return socket.emit('join-error', 'Invalid code')
+  socket.on('join-game', (payload) => {
+    const code = (payload && (typeof payload === 'object' ? payload.code : payload)) ?? ''
+    const username = (payload && typeof payload === 'object' && payload.username) || 'Player'
+    const codeStr = String(code).trim()
+    const game = games.get(codeStr)
+    if (!game) {
+      console.log(`[Mahjong] Join failed: code "${codeStr}" not found. Active codes: ${[...games.keys()].join(', ') || 'none'}`)
+      return socket.emit('join-error', 'Invalid code')
+    }
     const emptySlot = game.players.findIndex(p => !p.socketId)
     if (emptySlot < 0) return socket.emit('join-error', 'Game full')
     game.players[emptySlot].socketId = socket.id
-    socket.join(`game-${code}`)
-    io.to(`game-${code}`).emit('game-update', game)
+    game.players[emptySlot].username = username || `Player ${emptySlot + 1}`
+    socket.join(`game-${codeStr}`)
+    console.log(`[Mahjong] Player joined: ${username} -> game ${codeStr}`)
+    io.to(`game-${codeStr}`).emit('game-update', game)
   })
 
   socket.on('dealer-draw', () => {

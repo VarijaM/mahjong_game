@@ -1,0 +1,48 @@
+.winning-hand-examples {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(0,0,0,0.15);
+  border-radius: 12px;
+}
+
+.examples-intro {
+  font-size: 0.9rem;
+  opacity: 0.95;
+  margin-bottom: 1rem;
+}
+
+.winning-example {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+}
+
+.example-label {
+  font-size: 0.9rem;
+  margin: 0 0 0.75rem;
+  opacity: 0.9;
+}
+
+.example-melds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.example-meld {
+  display: flex;
+  gap: 2px;
+}
+
+.example-pair {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pair-label {
+  font-size: 0.85rem;
+  opacity: 0.85;
+}

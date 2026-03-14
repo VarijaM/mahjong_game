@@ -71,6 +71,18 @@
   border-radius: 8px;
 }
 
+.score-breakdown {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: rgba(0,0,0,0.3);
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.score-breakdown h4 { margin: 0 0 0.5rem; }
+.score-breakdown .payout { font-weight: 600; color: #c9a227; margin: 0.5rem 0; }
+.score-breakdown ul { margin: 0.5rem 0 0; padding-left: 1.25rem; opacity: 0.9; }
+
 .win-actions { display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; }
 
 .game-header button {
@@ -114,18 +126,59 @@
   font-size: 1.05rem;
 }
 
-.opponent-section,
+.opponents-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.opponent-block {
+  flex: 1;
+  min-width: 140px;
+}
+
+.opponent-block h4 {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  margin: 0 0 0.35rem;
+}
+
 .hand-section,
 .discards-section {
   margin-bottom: 1.5rem;
 }
 
-.opponent-section h3,
 .hand-section h3,
 .discards-section h3 {
   font-size: 0.9rem;
   opacity: 0.9;
   margin-bottom: 0.5rem;
+}
+
+.discards-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.discards-player {
+  flex: 1;
+  min-width: 120px;
+}
+
+.discards-label {
+  font-size: 0.8rem;
+  opacity: 0.85;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.discards-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  min-height: 28px;
 }
 
 .tile-row {
@@ -143,19 +196,6 @@
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-.discards-section {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.discards-human,
-.discards-ai {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-  min-height: 30px;
-}
 
 .flowers {
   display: flex;

@@ -56,23 +56,82 @@
   color: #1a4d2e;
 }
 
+.username-row input,
 .lobby-join input {
   padding: 0.8rem;
-  font-size: 1.2rem;
+  font-size: 1rem;
   border-radius: 8px;
   border: 2px solid rgba(255,255,255,0.3);
   background: rgba(255,255,255,0.1);
   color: inherit;
+  width: 100%;
+  box-sizing: border-box;
 }
 
+.username-row input::placeholder,
 .lobby-join input::placeholder {
   color: rgba(255,255,255,0.5);
+}
+
+.btn-back-inline {
+  background: transparent !important;
+  color: rgba(255,255,255,0.8);
+  border: 1px solid rgba(255,255,255,0.4);
 }
 
 .game-code {
   font-size: 2rem;
   font-weight: 700;
   letter-spacing: 0.2em;
+}
+
+.game-code-label {
+  font-size: 1.2rem;
+  margin-bottom: 0.25rem;
+}
+
+.lobby-hint {
+  opacity: 0.9;
+  margin-bottom: 1rem;
+}
+
+.lobby-players {
+  background: rgba(0,0,0,0.2);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.lobby-players h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+}
+
+.lobby-player-slot {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+  margin-bottom: 0.25rem;
+}
+
+.lobby-player-slot.filled {
+  background: rgba(201, 162, 39, 0.2);
+}
+
+.slot-num {
+  font-weight: 600;
+  min-width: 1.5rem;
+}
+
+.slot-name {
+  flex: 1;
+}
+
+.slot-waiting {
+  font-size: 0.85rem;
+  opacity: 0.7;
 }
 
 .hint { opacity: 0.9; }

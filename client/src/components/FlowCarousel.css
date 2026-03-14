@@ -1,0 +1,109 @@
+.flow-carousel {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: rgba(0,0,0,0.15);
+  border-radius: 12px;
+}
+
+.carousel-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.carousel-arrow {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.1);
+  color: inherit;
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.carousel-arrow:hover {
+  background: rgba(201, 162, 39, 0.4);
+  border-color: #c9a227;
+}
+
+.carousel-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.carousel-content h4 {
+  margin: 0 0 0.25rem;
+  font-size: 1.1rem;
+}
+
+.carousel-content p {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  opacity: 0.95;
+}
+
+.carousel-visual {
+  padding: 1rem;
+  background: rgba(0,0,0,0.2);
+  border-radius: 8px;
+}
+
+.carousel-hand {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.carousel-discards {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255,255,255,0.2);
+}
+
+.discard-label {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.carousel-hint {
+  margin: 0.5rem 0 0 !important;
+  font-size: 0.9rem;
+  color: #c9a227;
+}
+
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.3);
+  cursor: pointer;
+  padding: 0;
+}
+
+.carousel-dot:hover {
+  background: rgba(255,255,255,0.5);
+}
+
+.carousel-dot.active {
+  background: #c9a227;
+  transform: scale(1.2);
+}
