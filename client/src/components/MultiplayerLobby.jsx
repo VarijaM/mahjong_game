@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { io } from 'socket.io-client'
 import './MultiplayerLobby.css'
 
-// Connect directly to server - both tabs must hit same backend
-const API_BASE = import.meta.env.DEV ? 'http://localhost:3001' : window.location.origin
+// Backend URL: dev uses localhost; production uses VITE_API_URL if set (e.g. Railway)
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : window.location.origin)
 const SOCKET_URL = API_BASE
 const REQUIRED_PLAYERS = 4
 
@@ -45,7 +45,9 @@ export function MultiplayerLobby({ onBack, onStartGame }) {
     setError('')
     if (!username.trim()) return setError('Enter a username')
     if (!socket?.connected) {
-      setError('Server not connected. Start with: npm run dev (from project root)')
+      setError(import.meta.env.DEV
+        ? 'Server not connected. Run "npm run dev" from project root.'
+        : 'Multiplayer backend not configured. Set VITE_API_URL in Vercel to your deployed server URL.')
       return
     }
     socket.emit('create-game', { username: username.trim() })
@@ -75,7 +77,9 @@ export function MultiplayerLobby({ onBack, onStartGame }) {
         return
       }
     } catch (err) {
-      setError('Cannot reach server. Run "npm run dev" from project root (starts both client + server).')
+      setError(import.meta.env.DEV
+        ? 'Cannot reach server. Run "npm run dev" from project root.'
+        : 'Cannot reach multiplayer backend. Ensure VITE_API_URL points to your deployed server.')
       return
     }
 

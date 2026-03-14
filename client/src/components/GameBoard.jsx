@@ -156,20 +156,19 @@ export function GameBoard({ mode = 'computer', onBack, multiplayerData }) {
       return gameCopy
     }
 
-    const runUntilHumanTurn = () => {
-      let g = gameState ?? gameRef.current
-      g = runOneAITurn(g)
-      setGame(cloneGame(g))
-      if (g.phase === 'won') return
-      if (g.currentPlayerIndex === humanIndex) {
+    const runUntilHumanTurn = (g) => {
+      const next = runOneAITurn(g ?? gameRef.current)
+      setGame(cloneGame(next))
+      if (next.phase === 'won') return
+      if (next.currentPlayerIndex === humanIndex) {
         setMessage('Your turn: draw a tile.')
         return
       }
       setMessage('AI thinking...')
-      setTimeout(runUntilHumanTurn, 600)
+      setTimeout(() => runUntilHumanTurn(next), 400)
     }
 
-    runUntilHumanTurn()
+    runUntilHumanTurn(gameState ?? gameRef.current)
   }, [humanIndex])
 
   const handleClaimPung = useCallback(() => {
