@@ -2,12 +2,13 @@ import { useState } from 'react'
 import { TileGlossary } from './TileGlossary'
 import { TermsGlossary } from './TermsGlossary'
 import { MahjongQuiz } from './MahjongQuiz'
+import { ScoringSection } from './ScoringSection'
 import { WinningHandExample } from './WinningHandExample'
 import { FlowCarousel } from './FlowCarousel'
 import './HowToPlay.css'
 
 export function HowToPlay({ onBack }) {
-  const [section, setSection] = useState('overview') // overview | tiles | terms | quiz
+  const [section, setSection] = useState('overview') // overview | tiles | terms | scoring | quiz
 
   return (
     <div className="how-to-play">
@@ -19,6 +20,7 @@ export function HowToPlay({ onBack }) {
         <button type="button" className={section === 'overview' ? 'active' : ''} onClick={() => setSection('overview')}>Overview</button>
         <button type="button" className={section === 'tiles' ? 'active' : ''} onClick={() => setSection('tiles')}>Tile Glossary</button>
         <button type="button" className={section === 'terms' ? 'active' : ''} onClick={() => setSection('terms')}>Terms</button>
+        <button type="button" className={section === 'scoring' ? 'active' : ''} onClick={() => setSection('scoring')}>Scoring</button>
         <button type="button" className={section === 'quiz' ? 'active' : ''} onClick={() => setSection('quiz')}>Practice Quiz</button>
       </nav>
       <main className="htp-content">
@@ -44,11 +46,12 @@ export function HowToPlay({ onBack }) {
             <p className="htp-sources">Sources: <a href="https://en.wikipedia.org/wiki/Mahjong" target="_blank" rel="noopener noreferrer">Wikipedia</a>, <a href="https://sloperama.com/mjfaq/mjfaq23.html" target="_blank" rel="noopener noreferrer">MahJong FAQ</a></p>
 
             <h2>Next</h2>
-            <p>Check the <strong>Tile Glossary</strong> to see all tiles, and <strong>Terms</strong> for Pung, Chow, and more. Try the <strong>Practice Quiz</strong> before playing!</p>
+            <p>Check the <strong>Tile Glossary</strong> to see all tiles, <strong>Terms</strong> for Pung, Chow, and more, and <strong>Scoring</strong> for how points and payouts work. Try the <strong>Practice Quiz</strong> before playing!</p>
           </div>
         )}
         {section === 'tiles' && <TileGlossary />}
         {section === 'terms' && <TermsGlossary />}
+        {section === 'scoring' && <ScoringSection />}
         {section === 'quiz' && <MahjongQuiz />}
       </main>
     </div>

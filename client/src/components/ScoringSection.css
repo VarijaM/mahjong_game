@@ -1,0 +1,57 @@
+.scoring-section {
+  margin-top: 0;
+  padding: 1rem;
+  background: rgba(0,0,0,0.15);
+  border-radius: 12px;
+}
+
+.scoring-intro {
+  font-size: 0.95rem;
+  opacity: 0.95;
+  margin-bottom: 0.5rem;
+}
+
+.scoring-source {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  margin-bottom: 1.5rem;
+}
+
+.scoring-source a {
+  color: #c9a227;
+  text-decoration: none;
+}
+
+.scoring-source a:hover {
+  text-decoration: underline;
+}
+
+.scoring-section h2 {
+  margin: 1.5rem 0 0.5rem;
+  font-size: 1.2rem;
+}
+
+.scoring-section h2:first-child {
+  margin-top: 0;
+}
+
+.scoring-section h3 {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 1.05rem;
+}
+
+.scoring-section p {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+.scoring-section ul,
+.scoring-section ol {
+  padding-left: 1.5rem;
+  line-height: 1.7;
+  margin: 0.5rem 0;
+}
+
+.scoring-section ul ul {
+  margin: 0.25rem 0;
+}
