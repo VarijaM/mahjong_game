@@ -1,0 +1,44 @@
+.terms-glossary {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: rgba(0,0,0,0.15);
+  border-radius: 12px;
+}
+
+.term-card {
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+}
+
+.term-card h4 {
+  margin: 0 0 0.5rem;
+  color: #c9a227;
+}
+
+.term-card p {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.term-example {
+  margin-top: 0.75rem;
+}
+
+.term-example > span {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.example-tiles {
+  display: flex;
+  gap: 4px;
+  margin: 0.5rem 0;
+}
+
+.example-caption {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}

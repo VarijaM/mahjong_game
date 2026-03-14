@@ -1,0 +1,14 @@
+{
+  "name": "mahjong-server",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node index.js",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mahjong-game": "file:..",
+    "socket.io": "^4.7.2"
+  }
+}

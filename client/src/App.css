@@ -1,0 +1,111 @@
+.app {
+  min-height: 100vh;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.menu {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #1a4d2e 0%, #2d6a4f 50%, #1a4d2e 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: #fefae0;
+  position: relative;
+}
+
+.menu-decor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  opacity: 0.4;
+  font-size: 1.5rem;
+  letter-spacing: 0.25rem;
+  pointer-events: none;
+}
+
+.menu-decor.top {
+  top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.menu-decor.bottom {
+  bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.flower-decor {
+  font-size: 1.2rem;
+  letter-spacing: 0.5rem;
+}
+
+.menu h1 {
+  font-size: 3rem;
+  margin-bottom: 0.25rem;
+  font-weight: 700;
+}
+
+.menu-subtitle {
+  opacity: 0.9;
+  margin-bottom: 2rem;
+}
+
+.menu-buttons {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.menu-buttons button {
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  background: #c9a227;
+  color: #1a4d2e;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.menu-buttons button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(201, 162, 39, 0.4);
+}
+
+.menu-buttons button.btn-howto {
+  background: rgba(255,255,255,0.2);
+  color: #fefae0;
+  border: 2px solid rgba(255,255,255,0.4);
+}
+
+.menu-buttons button.btn-howto:hover {
+  background: rgba(255,255,255,0.3);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+}
+
+.menu-rules {
+  max-width: 400px;
+  background: rgba(255,255,255,0.08);
+  padding: 1.5rem;
+  border-radius: 12px;
+}
+
+.menu-rules h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+}
+
+.menu-rules ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  line-height: 1.7;
+  opacity: 0.95;
+}

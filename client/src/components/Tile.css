@@ -1,0 +1,72 @@
+.tile {
+  --tile-w: 52px;
+  --tile-h: 68px;
+  width: var(--tile-w);
+  height: var(--tile-h);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: transform 0.15s, box-shadow 0.15s;
+  background: linear-gradient(145deg, #f5eed8 0%, #e8dfc4 100%);
+  color: #2c1810;
+  position: relative;
+}
+
+.tile-char {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.tile:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.tile.selected {
+  transform: translateY(-8px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  border: 2px solid #c9a227;
+}
+
+.tile.hinted {
+  animation: pulse 1s ease-in-out infinite;
+  border: 2px solid #4a9c6d;
+}
+
+.tile.wild {
+  background: linear-gradient(145deg, #fff8e1 0%, #ffecb3 100%);
+  color: #b8860b;
+}
+
+.tile.wild .tile-wild {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  font-size: 0.7rem;
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* Suit-specific accents */
+.tile.dots { border-left: 4px solid #c62828; }
+.tile.bamboo { border-left: 4px solid #2e7d32; }
+.tile.characters { border-left: 4px solid #1565c0; }
+.tile.wind { border-left: 4px solid #6a1b9a; }
+.tile.dragon { border-left: 4px solid #d84315; }
+.tile.flower {
+  background: linear-gradient(145deg, #fce4ec 0%, #f8bbd9 100%);
+  color: #880e4f;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 2px 4px rgba(74, 156, 109, 0.4); }
+  50% { box-shadow: 0 2px 12px rgba(74, 156, 109, 0.8); }
+}

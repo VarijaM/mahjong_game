@@ -1,0 +1,260 @@
+.game-board {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #1a4d2e 0%, #2d6a4f 40%, #40916c 100%);
+  padding: 1.5rem;
+  color: #fefae0;
+}
+
+.game-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.game-board {
+  font-family: 'DM Sans', sans-serif;
+  position: relative;
+}
+
+.points-tracker {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  background: rgba(0,0,0,0.4);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.points-tracker h4 { margin: 0 0 0.25rem; font-size: 0.85rem; }
+.points-tracker .round { opacity: 0.9; }
+.scoring-help { margin-top: 0.5rem; font-size: 0.8rem; }
+.scoring-help ul { margin: 0.25rem 0 0; padding-left: 1.25rem; }
+
+.last-discard-claims {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.claim-label { font-size: 0.9rem; }
+.btn-claim {
+  padding: 0.4rem 0.8rem;
+  background: #c9a227;
+  color: #1a4d2e;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-draw-alt {
+  padding: 0.4rem 0.8rem;
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.4);
+  color: inherit;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.melds { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+.meld { display: flex; gap: 2px; }
+
+.opponent-reveal,
+.winning-hand-reveal {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: rgba(0,0,0,0.3);
+  border-radius: 8px;
+}
+
+.win-actions { display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap; }
+
+.game-header button {
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.4);
+  color: inherit;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.game-header button:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+.joker-info {
+  flex: 1;
+  text-align: center;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.wall-count-btn {
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  opacity: 0.9;
+  cursor: default;
+}
+.wall-count-btn:not(:disabled) {
+  cursor: pointer;
+  text-decoration: underline;
+}
+.wall-count-btn:not(:disabled):hover { opacity: 1; }
+
+.game-message {
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 1.05rem;
+}
+
+.opponent-section,
+.hand-section,
+.discards-section {
+  margin-bottom: 1.5rem;
+}
+
+.opponent-section h3,
+.hand-section h3,
+.discards-section h3 {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin-bottom: 0.5rem;
+}
+
+.tile-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+
+.tile-back {
+  width: var(--tile-w, 52px);
+  height: var(--tile-h, 68px);
+  background: linear-gradient(145deg, #8b7355 0%, #6b5344 100%);
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.discards-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.discards-human,
+.discards-ai {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  min-height: 30px;
+}
+
+.flowers {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+
+.action-hint {
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-hint {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.btn-primary {
+  background: #c9a227;
+  color: #1a4d2e;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(201, 162, 39, 0.5);
+}
+
+.btn-secondary {
+  background: #40916c;
+  color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-hint {
+  background: rgba(255,255,255,0.2);
+  color: inherit;
+  border: 1px solid rgba(255,255,255,0.4);
+}
+
+.btn-hint:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+.win-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  z-index: 100;
+}
+
+.win-overlay h2 {
+  font-size: 3rem;
+  color: #c9a227;
+  margin: 0;
+}
+
+.win-overlay p {
+  font-size: 1.5rem;
+}
+
+.win-overlay button {
+  padding: 0.6rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  background: #40916c;
+  color: white;
+}
+
+.win-overlay button:hover {
+  background: #52b788;
+}
