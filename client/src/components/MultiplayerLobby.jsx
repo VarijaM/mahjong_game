@@ -7,6 +7,10 @@ const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://
 const SOCKET_URL = API_BASE
 const REQUIRED_PLAYERS = 4
 
+function randomCode() {
+  return String(Math.floor(100000 + Math.random() * 900000))
+}
+
 export function MultiplayerLobby({ onBack, onStartGame }) {
   const [screen, setScreen] = useState('choose')
   const [code, setCode] = useState('')
@@ -16,6 +20,7 @@ export function MultiplayerLobby({ onBack, onStartGame }) {
   const [socket, setSocket] = useState(null)
   const [connected, setConnected] = useState(false)
   const [game, setGame] = useState(null)
+  const [demoMode, setDemoMode] = useState(false)
 
   useEffect(() => {
     const s = io(SOCKET_URL)
@@ -44,61 +49,78 @@ export function MultiplayerLobby({ onBack, onStartGame }) {
   const handleCreate = () => {
     setError('')
     if (!username.trim()) return setError('Enter a username')
-    if (!socket?.connected) {
-      setError(import.meta.env.DEV
-        ? 'Server not connected. Run "npm run dev" from project root.'
-        : 'Multiplayer backend not configured. Set VITE_API_URL in Vercel to your deployed server URL.')
+    if (socket?.connected) {
+      socket.emit('create-game', { username: username.trim() })
+      socket.once('game-created', ({ code: c, game: g }) => {
+        setCode(c)
+        setGame(g)
+        setScreen('lobby')
+      })
       return
     }
-    socket.emit('create-game', { username: username.trim() })
-    socket.once('game-created', ({ code: c, game: g }) => {
-      setCode(c)
-      setGame(g)
-      setScreen('lobby')
+    // Demo mode: show how Create Game → code → lobby works without a server
+    setDemoMode(true)
+    const c = randomCode()
+    setCode(c)
+    setGame({
+      players: [
+        { username: username.trim(), socketId: 'demo-you' },
+        null, null, null
+      ]
     })
+    setScreen('lobby')
   }
 
   const handleJoin = async () => {
     setError('')
     if (!joinCode.trim()) return setError('Enter a code')
     if (!username.trim()) return setError('Enter a username')
-    if (!socket?.connected) {
-      setError('Not connected to server. Wait a moment and try again.')
-      return
-    }
     const codeToJoin = joinCode.trim()
 
-    // Verify server is reachable and game exists (helps debug connection issues)
-    try {
-      const res = await fetch(`${API_BASE}/api/games`)
-      const data = await res.json()
-      if (!data.active.includes(codeToJoin)) {
-        setError(`Game ${codeToJoin} not found. Server has: ${data.active.length ? data.active.join(', ') : 'no games'}. Is the host still in the lobby?`)
+    if (socket?.connected) {
+      try {
+        const res = await fetch(`${API_BASE}/api/games`)
+        const data = await res.json()
+        if (!data.active.includes(codeToJoin)) {
+          setError(`Game ${codeToJoin} not found. Server has: ${data.active.length ? data.active.join(', ') : 'no games'}. Is the host still in the lobby?`)
+          return
+        }
+      } catch (err) {
+        setError(import.meta.env.DEV
+          ? 'Cannot reach server. Run "npm run dev" from project root.'
+          : 'Cannot reach multiplayer backend. Ensure VITE_API_URL points to your deployed server.')
         return
       }
-    } catch (err) {
-      setError(import.meta.env.DEV
-        ? 'Cannot reach server. Run "npm run dev" from project root.'
-        : 'Cannot reach multiplayer backend. Ensure VITE_API_URL points to your deployed server.')
+      socket.emit('join-game', { code: codeToJoin, username: username.trim() })
+      socket.once('join-error', (msg) => setError(msg))
+      socket.once('game-update', (g) => {
+        setGame(g)
+        setCode(codeToJoin)
+        setScreen('lobby')
+        const joined = g.players.filter(p => p.socketId).length
+        if (joined >= REQUIRED_PLAYERS) {
+          onStartGame?.({ game: g, code: codeToJoin, socket })
+        }
+      })
       return
     }
 
-    socket.emit('join-game', { code: codeToJoin, username: username.trim() })
-    socket.once('join-error', (msg) => setError(msg))
-    socket.once('game-update', (g) => {
-      setGame(g)
-      setCode(codeToJoin)
-      setScreen('lobby')
-      const joined = g.players.filter(p => p.socketId).length
-      if (joined >= REQUIRED_PLAYERS) {
-        onStartGame?.({ game: g, code: codeToJoin, socket })
-      }
+    // Demo mode: show Join flow (code → lobby)
+    setDemoMode(true)
+    setCode(codeToJoin)
+    setGame({
+      players: [
+        { username: 'Host', socketId: 'demo-host' },
+        { username: username.trim(), socketId: 'demo-you' },
+        null, null
+      ]
     })
+    setScreen('lobby')
   }
 
   const displayGame = game || { players: [] }
-  const joinedCount = displayGame.players?.filter(p => p.socketId).length || 0
-  const isHost = screen === 'lobby' && code && displayGame.players?.[0]?.socketId === socket?.id
+  const joinedCount = displayGame.players?.filter(p => p && p.socketId).length || 0
+  const isHost = screen === 'lobby' && code && (displayGame.players?.[0]?.socketId === socket?.id || (demoMode && displayGame.players?.[0]?.socketId === 'demo-you'))
 
   return (
     <div className="multiplayer-lobby">
@@ -108,7 +130,9 @@ export function MultiplayerLobby({ onBack, onStartGame }) {
       {screen === 'choose' && (
         <div className="lobby-choose">
           {!connected && (
-            <p className="connection-warn">Server not connected. Multiplayer needs the backend running.</p>
+            <p className="connection-warn connection-demo">
+              Server not connected. You can try <strong>Create Game</strong> or <strong>Join with Code</strong> to see how it works (demo mode).
+            </p>
           )}
           <div className="username-row">
             <input
@@ -119,10 +143,10 @@ export function MultiplayerLobby({ onBack, onStartGame }) {
               maxLength={20}
             />
           </div>
-          <button type="button" onClick={handleCreate} disabled={!connected || !username.trim()}>
+          <button type="button" onClick={handleCreate} disabled={!username.trim()}>
             Create Game
           </button>
-          <button type="button" onClick={() => setScreen('join')} disabled={!connected}>
+          <button type="button" onClick={() => setScreen('join')}>
             Join with Code
           </button>
           <button type="button" className="btn-alt" onClick={() => onStartGame?.({ fallback: true })}>
@@ -151,12 +175,14 @@ export function MultiplayerLobby({ onBack, onStartGame }) {
           <button type="button" onClick={handleJoin}>Join</button>
           <button type="button" className="btn-back-inline" onClick={() => setScreen('choose')}>← Back</button>
           {error && <p className="error">{error}</p>}
-          <p className="server-hint">Server must be running: npm run dev</p>
+          {!connected && <p className="server-hint server-hint-demo">No server? Enter any 6-digit code to see the demo flow.</p>}
+          {connected && <p className="server-hint">Server must be running: npm run dev</p>}
         </div>
       )}
 
       {screen === 'lobby' && (
         <div className="lobby-waiting">
+          {demoMode && <p className="demo-badge">Demo mode — showing how the flow works</p>}
           <p className="game-code-label">Game code: <strong>{code}</strong></p>
           <p className="lobby-hint">Share this code with friends. Game starts when 4 players join.</p>
           <div className="lobby-players">
@@ -164,7 +190,7 @@ export function MultiplayerLobby({ onBack, onStartGame }) {
             {[0, 1, 2, 3].map(i => {
               const p = displayGame.players?.[i]
               const name = p?.username || (p?.socketId ? `Player ${i + 1}` : '—')
-              const isYou = p?.socketId === socket?.id
+              const isYou = p?.socketId === socket?.id || p?.socketId === 'demo-you'
               return (
                 <div key={i} className={`lobby-player-slot ${p?.socketId ? 'filled' : ''}`}>
                   <span className="slot-num">{i + 1}.</span>
@@ -174,7 +200,7 @@ export function MultiplayerLobby({ onBack, onStartGame }) {
               )
             })}
           </div>
-          <p className="server-hint">Make sure the server is running: npm run dev</p>
+          {!demoMode && <p className="server-hint">Make sure the server is running: npm run dev</p>}
         </div>
       )}
 
