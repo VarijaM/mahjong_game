@@ -7,9 +7,6 @@ export function ScoringSection() {
         Scoring mahjong hands can be complicated. These rules are based on classic Chinese-style play. 
         Many households have their own variations—feel free to adapt!
       </p>
-      <p className="scoring-source">
-        Adapted from <a href="https://www.themahjongproject.com/how-to-play/scoring/#calculating" target="_blank" rel="noopener noreferrer">The Mahjong Project</a>
-      </p>
 
       <h2>Calculating the Score</h2>
       <p>Calculate your score in three steps:</p>
