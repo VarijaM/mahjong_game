@@ -59,6 +59,50 @@ const QUIZ_QUESTIONS = [
     type: 'claim-source',
     correct: 'left',
     prompt: 'For a Chow, you can only claim a discarded tile from:'
+  },
+  {
+    id: 7,
+    type: 'pung-or-chow',
+    tiles: [
+      createTile('dragon', 'R', 13),
+      createTile('dragon', 'R', 14),
+      createTile('dragon', 'R', 15)
+    ],
+    correct: 'pung',
+    prompt: 'What type of meld is this?'
+  },
+  {
+    id: 8,
+    type: 'pung-or-chow',
+    tiles: [
+      createTile('dots', 2, 16),
+      createTile('dots', 3, 17),
+      createTile('dots', 4, 18)
+    ],
+    correct: 'chow',
+    prompt: 'What type of meld is this?'
+  },
+  {
+    id: 9,
+    type: 'pung-or-chow',
+    tiles: [
+      createTile('characters', 1, 19),
+      createTile('characters', 1, 20),
+      createTile('characters', 1, 21)
+    ],
+    correct: 'pung',
+    prompt: 'What type of meld is this?'
+  },
+  {
+    id: 10,
+    type: 'pung-or-chow',
+    tiles: [
+      createTile('bamboo', 6, 22),
+      createTile('bamboo', 7, 23),
+      createTile('bamboo', 8, 24)
+    ],
+    correct: 'chow',
+    prompt: 'What type of meld is this?'
   }
 ]
 
